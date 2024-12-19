@@ -20,6 +20,7 @@ def get_events(url):
             "link": link.get('href')
         }
         events.append(event)
+
     return events
 
 def get_entries(url):
@@ -29,16 +30,14 @@ def get_entries(url):
     table = soup.table.tbody#.next_sibling.next_sibling  # navigate to table row of the first event
     lineups = table.find_all(class_="lineupTooltip")
     result = []
+
     for lineup in lineups:
         arr = lineup["title"].split("<br>")
         result.append(arr[0][3:])
+
     return result
 
 def create_file(entries, title):
-    # try:
-    #     duration = int(title)
-    # except:
-    #     duration = 2000
     duration = re.search("\([0-9]?[0-9][0-9][0-9]m", title)
     if duration:
         duration = duration.group()
@@ -63,26 +62,13 @@ def create_file(entries, title):
             "time_cap": 0
         }
     }
+
     if "relay" in title or "Relay" in title:
         race["display_prompt_at_splits"] = True
         race["race_type"] = "relay"
         race["sound_horn_at_splits"] = True
         race["team_size"] = 4
-    #     for competitor in entries:
-    #         boat = {
-    #             "affiliation": "",
-    #             "class_name": "",
-    #             "lane_number": lane,
-    #             "name": competitor[0],
-    #             "participants": [
-    #                 {
-    #                     "name": ""
-    #                 }
-    #             ]
-    #         }
-    #         race["race_definition"]["boats"].append(boat)
-    #         lane = lane + 1
-    # else:
+
     lane = 1
     for competitor in entries:
         boat = {
@@ -115,4 +101,6 @@ events = get_events(regatta_url)
 
 for event in events:
     entries = get_entries(event["link"])
-    create_file(entries, event["title"])
+    if len(entries) > 0:
+        create_file(entries, event["title"])
+    print(event["title"], len(entries))
